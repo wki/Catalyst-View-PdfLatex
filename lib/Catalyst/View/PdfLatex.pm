@@ -17,9 +17,10 @@ has pdflatex  => (is => 'rw', default => '/opt/local/bin/pdflatex');
 
 =head1 NAME
 
-Catalyst::View::PdfLatex
+Catalyst::View::PdfLatex - generate PDF files via pdflatex
 
 =head1 SYNOPSIS
+
 
 =head1 DESCRIPTION
 
@@ -56,9 +57,11 @@ sub process {
     my $self = shift;
     my $c = shift;
     
+    #
     # step 1: create LaTex Source Code from TT
+    #
     my %tt_config = (
-        INCLUDE_PATH => "${\$c->path_to('/')}",
+        INCLUDE_PATH => "${\$c->path_to($self->root_dir)}",
         INTERPOLATE => 1,
     );
     
@@ -75,7 +78,9 @@ sub process {
                       )
         or die $template->error();
     
+    #
     # step 2: create PDF from LaTeX
+    #
     die "pdflatex binary not found at: ${\$self->pdflatex}"
         if (!$self->pdflatex || !-x $self->pdflatex);
     chdir($tempdir);
@@ -83,7 +88,9 @@ sub process {
     die ".pdf file not present in $tempdir"
         if (!-f $pdf_file);
     
+    #
     # step 3: distribute PDF
+    #
     my $mime = MIME::Types->new->mimeTypeOf('pdf');
     if (exists($c->stash->{filename}) && $c->stash->{filename}) {
         $c->response->headers->header(
@@ -91,12 +98,21 @@ sub process {
             'Content-Disposition' => qq{attachment; filename="x.pdf"},
         );
     } else {
-        $c->response->headers->content_type($mime);
+        # $c->response->headers->content_type($mime);
+        $c->response->headers->header(
+            'Content-Type' => $mime,
+        );
     }
     $c->response->body( $pdf_file->slurp() );
     
+    #
     # step 4: remove all files we generated right now...
-    ### TODO.
+    #
+    # foreach my $file ($tex_file->dir->children) {
+    #     next if (substr($file->basename, 0, length($basename)) ne $basename);
+    #     $c->log->debug("removing file: $file");
+    #     $file->remove();
+    # }
     
     return 1;
 }
