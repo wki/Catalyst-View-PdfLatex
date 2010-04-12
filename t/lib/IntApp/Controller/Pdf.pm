@@ -2,6 +2,8 @@ package IntApp::Controller::Pdf;
 use Moose;
 BEGIN { extends 'Catalyst::Controller' }
 
+# __PACKAGE__->config->{namespace} = '';
+
 sub getit :Local {
     my ($self, $c) = @_;
     

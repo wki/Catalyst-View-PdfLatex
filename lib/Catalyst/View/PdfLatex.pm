@@ -103,7 +103,7 @@ sub process {
             'Content-Type' => $mime,
         );
     }
-    $c->response->body( $pdf_file->slurp() );
+    $c->response->body( '' . $pdf_file->slurp() ); # GOTCHA: scalar context!!
     
     #
     # step 4: remove all files we generated right now...
@@ -114,6 +114,7 @@ sub process {
     #     $file->remove();
     # }
     
+    # warn 'process is done now.';
     return 1;
 }
 
