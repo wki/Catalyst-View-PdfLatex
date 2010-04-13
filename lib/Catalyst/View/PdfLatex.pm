@@ -84,7 +84,7 @@ sub process {
     die "pdflatex binary not found at: ${\$self->pdflatex}"
         if (!$self->pdflatex || !-x $self->pdflatex);
     chdir($tempdir);
-    system($self->pdflatex, "$tex_file");
+    my $dummy = `${\$self->pdflatex} -interaction=batchmode "$tex_file"`;
     die ".pdf file not present in $tempdir"
         if (!-f $pdf_file);
     
@@ -94,8 +94,8 @@ sub process {
     my $mime = MIME::Types->new->mimeTypeOf('pdf');
     if (exists($c->stash->{filename}) && $c->stash->{filename}) {
         $c->response->headers->header(
-            'Content-Type'        => qq{$mime; name="x.pdf"},
-            'Content-Disposition' => qq{attachment; filename="x.pdf"},
+            'Content-Type'        => qq{$mime; name="${\$c->stash->{filename}}.pdf"},
+            'Content-Disposition' => qq{attachment; filename="${\$c->stash->{filename}}.pdf"},
         );
     } else {
         # $c->response->headers->content_type($mime);
